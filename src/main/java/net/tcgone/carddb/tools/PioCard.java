@@ -21,7 +21,10 @@ import net.tcgone.carddb.model.WeaknessResistance;
 
 import java.util.List;
 
-// models pokemontcg.io card format
+/**
+ * models pokemontcg.io card format
+ * @author axpendix@hotmail.com
+ */
 public class PioCard {
     public String id;
     public String name;

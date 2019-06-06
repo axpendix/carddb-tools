@@ -15,14 +15,20 @@ limitations under the License.
 */
 package net.tcgone.carddb.tools;
 
+import net.tcgone.carddb.model.Card;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author axpendix@hotmail.com
+ */
 @SpringBootApplication(scanBasePackages = "net.tcgone.carddb")
 public class Application implements ApplicationRunner {
 
@@ -49,11 +55,23 @@ public class Application implements ApplicationRunner {
 			printUsage();
 			return;
 		}
-
-//		// run below to merge all from pio to ones in db
-//		pioReader.init();
-//		// then overwrite yamls here
-//		setWriter.writeAllMerged();
+		List<Card> allCards=new ArrayList<>();
+		if(pios!=null){
+			for (String pio : pios) {
+				allCards.addAll(pioReader.loadPio(new FileInputStream(pio), PioReader.ReaderMode.PIO));
+			}
+		}
+		if(kirbies!=null){
+			for (String kirby : kirbies) {
+				allCards.addAll(pioReader.loadPio(new FileInputStream(kirby), PioReader.ReaderMode.KIRBY));
+			}
+		}
+		if(exportYaml){
+			setWriter.writeAll(allCards);
+		}
+		if(exportImplTmpl){
+			System.err.println("export-impl-tmpl not implemented yet");
+		}
 	}
 
 	private void printUsage() {

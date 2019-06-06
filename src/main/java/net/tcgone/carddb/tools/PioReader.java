@@ -22,17 +22,19 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.tcgone.carddb.model.Ability;
 import net.tcgone.carddb.model.Card;
-import net.tcgone.carddb.model.SetFile;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.trimToNull;
 
+/**
+ * @author axpendix@hotmail.com
+ */
 @Component
 public class PioReader {
 
@@ -42,16 +44,15 @@ public class PioReader {
 		PIO, KIRBY
 	}
 
-	public SetFile loadPio(Resource resource,ReaderMode mode) throws IOException {
+	public List<Card> loadPio(InputStream inputStream, ReaderMode mode) throws IOException {
 		ObjectMapper mapper = new ObjectMapper()
 				.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
 //        Resource[] resources = applicationContext.getResources("classpath:/pio/*.json");
 		Map<String, Set<String>> superToSub = new LinkedHashMap<>();
-		SetFile setFile=new SetFile();
-		setFile.cards=new ArrayList<>();
+		List<Card> cards=new ArrayList<>();
 
-		log.info("Reading {}", resource.getFilename());
-		List<PioCard> list = mapper.readValue(resource.getInputStream(), new TypeReference<List<PioCard>>(){});
+//		log.info("Reading {}", resource.getFilename());
+		List<PioCard> list = mapper.readValue(inputStream, new TypeReference<List<PioCard>>(){});
 		for (PioCard pc : list) {
 			log.info("- {} {}", pc.name, pc.number);
 			if(pc.set.equals("Expedition Base Set"))
@@ -118,11 +119,12 @@ public class PioReader {
 			superToSub.get(pc.supertype).add(pc.subtype);
 
 			Card c1 = prepareCard(pc);
-			setFile.cards.add(c1);
+			cards.add(c1);
 
 		}
-		log.info("superToSub: {}", superToSub);
-		return setFile;
+//		log.info("superToSub: /{}/", superToSub);
+		inputStream.close();
+		return cards;
 	}
 
 	private Set<String> stage1Db = new HashSet<>();
