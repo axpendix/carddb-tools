@@ -42,11 +42,7 @@ public class PioReader {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PioReader.class);
 
-	public enum ReaderMode {
-		PIO, KIRBY
-	}
-
-	public List<Card> loadPio(InputStream inputStream, ReaderMode mode) throws IOException {
+	public List<Card> load(InputStream inputStream) throws IOException {
 		ObjectMapper mapper = new ObjectMapper()
 				.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
 //        Resource[] resources = applicationContext.getResources("classpath:/pio/*.json");

@@ -73,7 +73,7 @@ public class Application implements ApplicationRunner {
 		if(pios!=null){
 			for (String filename : pios) {
 				log.info("Reading {}", filename);
-				allCards.addAll(pioReader.loadPio(new FileInputStream(filename), PioReader.ReaderMode.PIO));
+				allCards.addAll(pioReader.load(new FileInputStream(filename)));
 			}
 		}
 		if(yamls!=null){
@@ -103,7 +103,7 @@ public class Application implements ApplicationRunner {
 	}
 
 	private void printUsage() {
-		System.out.println("This tool loads and converts pio/kirby format Pokemon TCG data into TCG ONE Card Database format and/or TCG ONE Card Implementation Groovy Template. \n" +
+		System.out.println("This tool loads and converts pio format Pokemon TCG data into TCG ONE Card Database format and/or TCG ONE Card Implementation Groovy Template. \n" +
 				"Load pio files (https://github.com/PokemonTCG/pokemon-tcg-data/tree/master/json/cards) or kirby files (https://github.com/kirbyUK/ptcgo-data/tree/master/en_US) by; \n" +
 				"\t'--pio=Unbroken Bonds.json' '--pio=Detective Pikachu.json' '--pio=../sm9.json' '--pio=../det1.json' and so on. Multiple files can be loaded this way.\n" +
 				"and/or load TCG ONE yaml files directly by; \n" +
