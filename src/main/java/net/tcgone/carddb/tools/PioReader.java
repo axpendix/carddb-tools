@@ -197,6 +197,9 @@ public class PioReader {
 				c.subTypes.add("BASIC");
 				if(pc.name.contains("-GX")){
 					c.subTypes.add("POKEMON_GX");
+					if(pc.name.contains(" & ")){
+						c.subTypes.add("TAG_TEAM");
+					}
 				}
 				if(pc.name.contains("-EX")){
 					c.subTypes.add("POKEMON_EX");
@@ -207,6 +210,9 @@ public class PioReader {
 				c.subTypes.add("STAGE1");
 				if(pc.name.contains("-GX")){
 					c.subTypes.add("POKEMON_GX");
+					if(pc.name.contains(" & ")){
+						c.subTypes.add("TAG_TEAM");
+					}
 				}
 				if(pc.name.contains("-EX")){
 					c.subTypes.add("POKEMON_EX");
@@ -218,6 +224,9 @@ public class PioReader {
 				c.subTypes.add("STAGE2");
 				if(pc.name.contains("-GX")){
 					c.subTypes.add("POKEMON_GX");
+					if(pc.name.contains(" & ")){
+						c.subTypes.add("TAG_TEAM");
+					}
 				}
 				if(pc.name.contains("-EX")){
 					c.subTypes.add("POKEMON_EX");
@@ -226,6 +235,9 @@ public class PioReader {
 			case "GX":
 				c.subTypes.add("BASIC");
 				c.subTypes.add("POKEMON_GX");
+				if(pc.name.contains(" & ")){
+					c.subTypes.add("TAG_TEAM");
+				}
 				break;
 			case "EX":
 				c.subTypes.add(pc.name.endsWith(" ex") ? "EX" : "POKEMON_EX");

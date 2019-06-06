@@ -96,7 +96,7 @@ public class ImplTmplGenerator {
 				predecessor=card.evolvesFrom;
 				if(card.weaknesses!=null){
 					for (WeaknessResistance wr : card.weaknesses) {
-						weakness.append(String.format("weakness %s, '%s'\n\t\t\t\t", wr.type, wr.value));
+						weakness.append(String.format("weakness %s%s\n\t\t\t\t", wr.type, !wr.value.equalsIgnoreCase("x2")?", '"+wr.value+"'":""));
 					}
 				}
 				if(card.resistances!=null){
