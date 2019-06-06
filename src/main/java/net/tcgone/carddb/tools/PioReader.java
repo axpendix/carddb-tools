@@ -135,6 +135,7 @@ public class PioReader {
 				.replace("–","-").replace("’","'").toUpperCase(Locale.ENGLISH)
 				.replaceAll("[ \\p{Punct}]", "_").replaceAll("_+","_").replace("É", "E"), pc.number);
 		c.id=String.format("%s-%s", set.id, pc.number);
+		c.subTypes=new ArrayList<>();
 
 		switch (pc.supertype){
 			case "Pokémon":
@@ -181,9 +182,13 @@ public class PioReader {
 				break;
 			case "Energy":
 				c.superType="ENERGY";
+				if(c.text!=null&&!c.text.isEmpty()){
+					c.subTypes.add("SPECIAL_ENERGY");
+				} else {
+					c.subTypes.add("BASIC_ENERGY");
+				}
 				break;
 		}
-		c.subTypes=new ArrayList<>();
 		switch (pc.subtype){
 			case "LEGEND":
 				c.subTypes.add("LEGEND");

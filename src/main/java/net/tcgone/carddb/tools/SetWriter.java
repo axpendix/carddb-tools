@@ -155,16 +155,16 @@ public class SetWriter {
         out.write(dump);
         out.close();
     }
-    public void writeAll(List<Card> cards) throws IOException {
-        cards.sort((o1, o2) -> {
-            try {
-                Integer n1 = Integer.parseInt(o1.number);
-                Integer n2 = Integer.parseInt(o2.number);
-                return n1.compareTo(n2);
-            } catch (NumberFormatException e) {
-                return o1.number.compareTo(o2.number);
-            }
-        });
+
+    public void writeAll(Collection<SetFile> setFiles) throws IOException {
+        new File("output").mkdirs();
+        for (SetFile setFile : setFiles) {
+            String filename = String.format("output/%s-%s.yaml", setFile.set.id, setFile.set.enumId.toLowerCase(Locale.ENGLISH));
+            this.write(setFile, filename);
+        }
+    }
+
+    public Map<String, SetFile> prepareSetFiles(List<Card> cards) {
         Map<String, SetFile> setFileMap=new HashMap<>();
         for (Card card : cards) {
             String key = card.set.enumId;
@@ -172,16 +172,36 @@ public class SetWriter {
                 SetFile setFile = new SetFile();
                 setFile.set=card.set;
                 setFile.cards=new ArrayList<>();
-                setFile.cards.add(card);
                 setFileMap.put(key, setFile);
-            } else {
-                setFileMap.get(key).cards.add(card);
             }
+            setFileMap.get(key).cards.add(card);
         }
-        new File("output").mkdirs();
         for (SetFile setFile : setFileMap.values()) {
-            String filename = String.format("output/%s-%s.yaml", setFile.set.id, setFile.set.enumId.toLowerCase(Locale.ENGLISH));
-            this.write(setFile, filename);
+            setFile.cards.sort((o1, o2) -> {
+                try {
+                    Integer n1 = Integer.parseInt(o1.number);
+                    Integer n2 = Integer.parseInt(o2.number);
+                    return n1.compareTo(n2);
+                } catch (NumberFormatException e) {
+                    return o1.number.compareTo(o2.number);
+                }
+            });
+        }
+        return setFileMap;
+    }
+    public void prepareReprints(Collection<SetFile> setFiles){
+        Map<EqualityCard,Card> map=new HashMap<>();
+        for (SetFile setFile : setFiles) {
+            for (Card c : setFile.cards) {
+//                int hash = Objects.hash(c.name, c.types, c.superType, c.subTypes, c.evolvesFrom, c.hp, c.retreatCost, c.abilities, c.moves, c.weaknesses, c.resistances, c.text, c.energy);
+                EqualityCard ec = new EqualityCard(c);
+                if(map.containsKey(ec)){
+                    c.copyType="Reprint";
+                    c.copyOf=map.get(ec).id;
+                } else {
+                    map.put(ec,c);
+                }
+            }
         }
     }
 }

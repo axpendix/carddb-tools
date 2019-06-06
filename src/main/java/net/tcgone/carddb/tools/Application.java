@@ -15,7 +15,10 @@ limitations under the License.
 */
 package net.tcgone.carddb.tools;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import net.tcgone.carddb.model.Card;
+import net.tcgone.carddb.model.SetFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -25,6 +28,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author axpendix@hotmail.com
@@ -33,6 +37,7 @@ import java.util.List;
 public class Application implements ApplicationRunner {
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Application.class);
+	private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
 	public static void main(String[] args) {
 		System.setProperty("java.net.useSystemProxies","true");
@@ -46,12 +51,14 @@ public class Application implements ApplicationRunner {
 	private SetWriter setWriter;
 	@Autowired
 	private ScanDownloader scanDownloader;
+	@Autowired
+	private ImplTmplGenerator implTmplGenerator;
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
 		List<String> pios = args.getOptionValues("pio");
-		List<String> kirbies = args.getOptionValues("kirby");
-		if((pios==null||pios.isEmpty())&&(kirbies==null||kirbies.isEmpty())){
+		List<String> yamls = args.getOptionValues("yaml");
+		if((pios==null||pios.isEmpty())&&(yamls==null||yamls.isEmpty())){
 			printUsage();
 			return;
 		}
@@ -69,30 +76,38 @@ public class Application implements ApplicationRunner {
 				allCards.addAll(pioReader.loadPio(new FileInputStream(filename), PioReader.ReaderMode.PIO));
 			}
 		}
-		if(kirbies!=null){
-			for (String filename : kirbies) {
+		if(yamls!=null){
+			for (String filename : yamls) {
 				log.info("Reading {}", filename);
-				allCards.addAll(pioReader.loadPio(new FileInputStream(filename), PioReader.ReaderMode.KIRBY));
+				SetFile setFile = mapper.readValue(new FileInputStream(filename), SetFile.class);
+				for (Card card : setFile.cards) {
+					card.set = setFile.set; // temporary
+				}
+				allCards.addAll(setFile.cards);
 			}
 		}
+		Map<String, SetFile> setFileMap = setWriter.prepareSetFiles(allCards);
+		setWriter.prepareReprints(setFileMap.values());
 		if(downloadScans){
 			scanDownloader.downloadAll(allCards);
+			log.info("Scans have been saved into ./scans folder");
 		}
 		if(exportImplTmpl){
-			log.warn("export-impl-tmpl not implemented yet");
+			implTmplGenerator.writeAll(setFileMap.values());
+			log.info("Impl Tmpls have been written to ./impl folder");
 		}
 		if(exportYaml){
-			setWriter.writeAll(allCards);
+			setWriter.writeAll(setFileMap.values());
 			log.info("YAMLs have been written to ./output folder");
 		}
 	}
 
 	private void printUsage() {
 		System.out.println("This tool loads and converts pio/kirby format Pokemon TCG data into TCG ONE Card Database format and/or TCG ONE Card Implementation Groovy Template. \n" +
-				"Load pio files (https://github.com/PokemonTCG/pokemon-tcg-data/tree/master/json/cards) by; \n" +
-				"\t--pio 'Unbroken Bonds.json' --pio 'Detective Pikachu.json' and so on. Multiple files can be loaded this way.\n" +
-				"and/or load kirby files (https://github.com/kirbyUK/ptcgo-data/tree/master/en_US) by; \n" +
-				"\t--kirby 'sm9.json' --kirby 'det1.json' and so on. Multiple files can be loaded this way.\n" +
+				"Load pio files (https://github.com/PokemonTCG/pokemon-tcg-data/tree/master/json/cards) or kirby files (https://github.com/kirbyUK/ptcgo-data/tree/master/en_US) by; \n" +
+				"\t'--pio=Unbroken Bonds.json' '--pio=Detective Pikachu.json' '--pio=../sm9.json' '--pio=../det1.json' and so on. Multiple files can be loaded this way.\n" +
+				"and/or load TCG ONE yaml files directly by; \n" +
+				"\t'--yaml=423-unbroken_bonds.yaml' and so on. Multiple files can be loaded this way.\n" +
 				"then, export to yaml or impl-tmpl;\n" +
 				"\t--export-yaml --export-impl-tmpl\n" +
 				"and/or download scans;\n" +
