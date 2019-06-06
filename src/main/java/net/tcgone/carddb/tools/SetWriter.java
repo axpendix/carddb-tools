@@ -196,8 +196,17 @@ public class SetWriter {
 //                int hash = Objects.hash(c.name, c.types, c.superType, c.subTypes, c.evolvesFrom, c.hp, c.retreatCost, c.abilities, c.moves, c.weaknesses, c.resistances, c.text, c.energy);
                 EqualityCard ec = new EqualityCard(c);
                 if(map.containsKey(ec)){
-                    c.copyType="Reprint";
-                    c.copyOf=map.get(ec).id;
+                    Card oc = map.get(ec);
+                    if(c.rarity.equalsIgnoreCase("Ultra Rare")) {
+                        // most likely full art
+                        c.copyType="Full Art";
+                    } else if(c.rarity.equalsIgnoreCase("Secret")) {
+                        // most likely secret art
+                        c.copyType="Secret Art";
+                    } else {
+                        c.copyType="Reprint";
+                    }
+                    c.copyOf=oc.id;
                 } else {
                     map.put(ec,c);
                 }
