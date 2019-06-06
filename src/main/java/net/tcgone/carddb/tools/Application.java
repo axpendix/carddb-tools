@@ -35,6 +35,8 @@ public class Application implements ApplicationRunner {
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Application.class);
 
 	public static void main(String[] args) {
+		System.setProperty("java.net.useSystemProxies","true");
+		System.setProperty("http.agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.7 (KHTML, like Gecko) Chrome/16.0.912.75 Safari/535.7");
 		SpringApplication.run(Application.class, args);
 	}
 
@@ -42,6 +44,8 @@ public class Application implements ApplicationRunner {
 	private PioReader pioReader;
 	@Autowired
 	private SetWriter setWriter;
+	@Autowired
+	private ScanDownloader scanDownloader;
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
@@ -53,7 +57,8 @@ public class Application implements ApplicationRunner {
 		}
 		boolean exportYaml = args.getOptionValues("export-yaml")!=null;
 		boolean exportImplTmpl = args.getOptionValues("export-impl-tmpl")!=null;
-		if(!exportImplTmpl&&!exportYaml){
+		boolean downloadScans = args.getOptionValues("download-scans")!=null;
+		if(!exportImplTmpl&&!exportYaml&&!downloadScans){
 			printUsage();
 			return;
 		}
@@ -70,12 +75,15 @@ public class Application implements ApplicationRunner {
 				allCards.addAll(pioReader.loadPio(new FileInputStream(filename), PioReader.ReaderMode.KIRBY));
 			}
 		}
-		if(exportYaml){
-			setWriter.writeAll(allCards);
-			log.info("YAMLs have been written to ./output folder");
+		if(downloadScans){
+			scanDownloader.downloadAll(allCards);
 		}
 		if(exportImplTmpl){
 			log.warn("export-impl-tmpl not implemented yet");
+		}
+		if(exportYaml){
+			setWriter.writeAll(allCards);
+			log.info("YAMLs have been written to ./output folder");
 		}
 	}
 
@@ -86,6 +94,8 @@ public class Application implements ApplicationRunner {
 				"and/or load kirby files (https://github.com/kirbyUK/ptcgo-data/tree/master/en_US) by; \n" +
 				"\t--kirby 'sm9.json' --kirby 'det1.json' and so on. Multiple files can be loaded this way.\n" +
 				"then, export to yaml or impl-tmpl;\n" +
-				"\t--export-yaml --export-impl-tmpl\n");
+				"\t--export-yaml --export-impl-tmpl\n" +
+				"and/or download scans;\n" +
+				"\t--download-scans");
 	}
 }
