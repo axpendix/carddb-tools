@@ -22,6 +22,7 @@ public class ImplTmplGenerator {
 	private Map<String,String> typesMap = ImmutableMap.<String,String>builder().put("R","Fire").put("G","Grass").put("W","Water").put("F","Fighting").put("C","Colorless").put("L","Lightning").put("P","Psychic").put("D","Darkness").put("M","Metal").put("N","Dragon").put("Y","Fairy").build();
 
 	public void writeAll(Collection<SetFile> setFiles) throws Exception {
+		new File("impl").mkdirs();
 		for (SetFile setFile : setFiles) {
 			write(setFile);
 		}
@@ -54,7 +55,7 @@ public class ImplTmplGenerator {
 			String predecessor = null;
 			String cardtext = null;
 			if(card.text!=null) {
-				cardtext=StringUtils.join(card.text,"\n");
+				cardtext=StringUtils.join(card.text,"\" +\n\t\t\t\t\t\"");
 			}
 			String typesCombined = null;
 			StringBuilder weakness = new StringBuilder();
@@ -148,8 +149,11 @@ public class ImplTmplGenerator {
 				if(card.moves!=null) {
 					for (Move m : card.moves) {
 						String movedesc = "";
-						if(m.damage!=null)
+						String movedamg = null;
+						if(m.damage!=null){
 							movedesc+=m.damage+" damage. ";
+							movedamg=m.damage.replaceAll("[^\\d]","");
+						}
 						if(m.text!=null)
 							movedesc+=m.text;
 						moves.append(String.format("move \"%s\", {\n" +
@@ -159,7 +163,7 @@ public class ImplTmplGenerator {
 								"\t\t\t\t\tonAttack {\n" +
 								"\t\t\t\t\t\t%s\n" +
 								"\t\t\t\t\t}\n" +
-								"\t\t\t\t}\n\t\t\t\t", m.name, movedesc, StringUtils.join(m.cost,", "),m.damage!=null?"damage "+m.damage:""));
+								"\t\t\t\t}\n\t\t\t\t", m.name, movedesc, StringUtils.join(m.cost,", "),movedamg!=null?"damage "+movedamg:""));
 
 					}
 				}
@@ -255,7 +259,7 @@ public class ImplTmplGenerator {
 				//search for reprints in same set
 				for(List2Item list2Item : list2){
 					if(list2Item.getId().equals(card.copyOf)){
-						impl = String.format("copy (%s, this)\n\t\t\t", list2Item.name);
+						impl = String.format("copy (%s, this)", list2Item.name);
 						System.out.println("REPRINT_SAME "+ list2Item.name);
 						break;
 					}
@@ -283,7 +287,7 @@ public class ImplTmplGenerator {
 			properties.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 			Velocity.init(properties);
 			VelocityContext context = new VelocityContext(modelmap);
-			Writer writer = new FileWriter(new File(modelmap.get("classname")+".groovy"));
+			Writer writer = new FileWriter(new File(String.format("impl/%s.groovy", modelmap.get("classname"))));
 			Velocity.mergeTemplate("set2.vm", "UTF-8", context, writer);
 			writer.close();
 		} catch (Exception e) {

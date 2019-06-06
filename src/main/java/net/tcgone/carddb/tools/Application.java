@@ -92,13 +92,13 @@ public class Application implements ApplicationRunner {
 			scanDownloader.downloadAll(allCards);
 			log.info("Scans have been saved into ./scans folder");
 		}
-		if(exportImplTmpl){
-			implTmplGenerator.writeAll(setFileMap.values());
-			log.info("Impl Tmpls have been written to ./impl folder");
-		}
 		if(exportYaml){
 			setWriter.writeAll(setFileMap.values());
 			log.info("YAMLs have been written to ./output folder");
+		}
+		if(exportImplTmpl){
+			implTmplGenerator.writeAll(setFileMap.values());
+			log.info("Impl Tmpls have been written to ./impl folder");
 		}
 	}
 
