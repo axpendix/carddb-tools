@@ -22,6 +22,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import net.tcgone.carddb.model.Ability;
 import net.tcgone.carddb.model.Card;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.WordUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -51,49 +53,28 @@ public class PioReader {
 		Map<String, Set<String>> superToSub = new LinkedHashMap<>();
 		List<Card> cards=new ArrayList<>();
 
-//		log.info("Reading {}", resource.getFilename());
+//
 		List<PioCard> list = mapper.readValue(inputStream, new TypeReference<List<PioCard>>(){});
 		for (PioCard pc : list) {
-			log.info("- {} {}", pc.name, pc.number);
-			if(pc.set.equals("Expedition Base Set"))
-				pc.set="Expedition";
-			if(pc.set.equals("SM Black Star Promos"))
-				pc.set="Sun & Moon Promos";
-			if(pc.set.equals("XY Black Star Promos"))
-				pc.set="XY Promos";
-			if(pc.set.equals("BW Black Star Promos"))
-				pc.set="Black & White Promos";
-			if(pc.set.equals("Base"))
-				pc.set="Base Set";
-			if(pc.set.equals("HS—Triumphant"))
-				pc.set="Triumphant";
-			if(pc.set.equals("HS—Undaunted"))
-				pc.set="Undaunted";
-			if(pc.set.equals("HS—Unleashed"))
-				pc.set="Unleashed";
-
-			if("Rare Secret".equalsIgnoreCase(pc.rarity))
-				pc.rarity="Secret";
-			else if("Rare ACE".equalsIgnoreCase(pc.rarity))
-				pc.rarity="Rare";
-			else if("Rare Holo Lv.X".equalsIgnoreCase(pc.rarity))
-				pc.rarity="Rare Holo";
-			else if("Rare Ultra".equalsIgnoreCase(pc.rarity))
-				pc.rarity="Ultra Rare";
-			else if("Rare Prime".equalsIgnoreCase(pc.rarity))
-				pc.rarity="Rare";
-			else if("Rare BREAK".equalsIgnoreCase(pc.rarity))
-				pc.rarity="Ultra Rare";
-			else if("Rare Holo EX".equalsIgnoreCase(pc.rarity))
-				pc.rarity="Ultra Rare";
-			else if("Rare Holo GX".equalsIgnoreCase(pc.rarity))
-				pc.rarity="Rare Holo";
-			else if("LEGEND".equalsIgnoreCase(pc.rarity))
-				pc.rarity="Ultra Rare";
-			else if("Rare".equals(pc.rarity)||"Common".equals(pc.rarity)||"Uncommon".equals(pc.rarity)||"Rare Holo".equals(pc.rarity)){
-				//ok
-			} else {
-				log.warn("Rarity '{}' was not recognized! Please fix it and re-run", pc.rarity);
+			log.info("Reading {} {}", pc.name, pc.number);
+			if(pc.rarity==null){
+				throw new IllegalStateException("rarity cannot be null");
+			}
+			pc.rarity=pc.rarity
+					.toLowerCase(Locale.ENGLISH)
+					.replace("rare secret","Secret")
+					.replace("rare ace","Rare")
+					.replace("rare holo lv.x","Rare Holo")
+					.replace("rare ultra","Ultra Rare")
+					.replace("rareultra","Ultra Rare")
+					.replace("rare prime","Rare")
+					.replace("rare break","Ultra Rare")
+					.replace("rare holo ex","Ultra Rare")
+					.replace("rare holo gx","Ultra Rare")
+					.replace("legend","Ultra Rare");
+			pc.rarity= WordUtils.capitalizeFully(pc.rarity);
+			if(!allowedRarities.contains(pc.rarity)){
+				throw new IllegalStateException(pc.rarity+" cannot be accepted as rarity, please fix.");
 			}
 
 			if(pc.supertype.equals("Pokémon") && pc.types == null){
@@ -109,9 +90,6 @@ public class PioReader {
 //                }
 //                if(pc.subtype.equals("Level Up")){
 //                    log.warn("Level Up. name:{}, level:{}", pc.name, pc.level);
-//                }
-//                if(!isNotBlank(pc.series)){
-//                    log.warn("BLANK SERIES {} {}", pc.name, pc.set);
 //                }
 
 			if(!superToSub.containsKey(pc.supertype))
@@ -129,6 +107,7 @@ public class PioReader {
 
 	private Set<String> stage1Db = new HashSet<>();
 	private Set<String> modernSeries = ImmutableSet.of("Black & White", "XY", "Sun & Moon");
+	private Set<String> allowedRarities = ImmutableSet.of("Common","Uncommon","Rare","Ultra Rare","Rare Holo","Secret","Promo");
 	private Map<String,String> typesMap = ImmutableMap.<String,String>builder().put("Fire","R").put("Grass","G").put("Water","W").put("Fighting","F").put("Colorless","C").put("Lightning","L").put("Psychic","P").put("Darkness","D").put("Metal","M").put("Dragon","N").put("Fairy","Y").build();
 	private Map<String, net.tcgone.carddb.model.Set> setMap = new HashMap<>();
 
@@ -138,30 +117,23 @@ public class PioReader {
 		c.pioId=pc.id;
 		c.number=pc.number;
 		c.artist=pc.artist;
-		if(pc.text!=null)c.text=pc.text.stream().map(this::replaceTypesWithShortForms).flatMap(x->Arrays.stream(x.split("\n"))).collect(Collectors.toList());
+		if(pc.text!=null)c.text=pc.text.stream().map(this::replaceTypesWithShortForms).flatMap(x->Arrays.stream(x.split("\\\\n"))).filter(s->!s.trim().isEmpty()).collect(Collectors.toList());
 		c.rarity=pc.rarity;
 		if(!setMap.containsKey(pc.setCode)){
+			CoreCollection cc = CoreCollection.findByPioCode(pc.setCode).orElseThrow(() -> new IllegalArgumentException(pc.setCode + " pioCode can't be recognized (probably it's a new set). Please update CoreCollection enum and rerun."));
 			net.tcgone.carddb.model.Set set = new net.tcgone.carddb.model.Set();
-			set.name=pc.set;
-			CoreCollection byName;
-			try {
-				byName = CoreCollection.findByName(pc.set);
-				set.enumId=byName.name();
-				set.id= String.valueOf(byName.getId());
-				set.abbr=byName.getShortName();
-			} catch (Exception e) {
-				e.printStackTrace();
-				set.enumId=askAndGet("Can't find "+pc.set+" in CoreCollection (please add it). Enter enum id");
-				set.id=askAndGet("Enter id");
-				set.abbr=askAndGet("Enter abbr");
-			}
+			set.name=cc.getName();
+			set.id= String.valueOf(cc.getId());
+			set.abbr=cc.getShortName();
+			set.enumId=cc.name();
+			set.pioId=pc.setCode;
 			setMap.put(pc.setCode, set);
 		}
 		net.tcgone.carddb.model.Set set = setMap.get(pc.setCode);
 		c.set=set;
 		c.enumId=String.format("%s_%s", pc.name
 				.replace("–","-").replace("’","'").toUpperCase(Locale.ENGLISH)
-				.replaceAll("[ \\p{Punct}]", "_").replace("É", "E"), pc.number);
+				.replaceAll("[ \\p{Punct}]", "_").replaceAll("_+","_").replace("É", "E"), pc.number);
 		c.id=String.format("%s-%s", set.id, pc.number);
 
 		switch (pc.supertype){
@@ -170,15 +142,15 @@ public class PioReader {
 				// hp of one side of legend cards is null
 				if(pc.hp!=null) c.hp= Integer.valueOf(pc.hp);
 				c.retreatCost=pc.convertedRetreatCost;
-				if(pc.resistances!=null) c.resistances=pc.resistances.stream().peek(wr -> {
+				if(pc.resistances!=null&&!pc.resistances.isEmpty()) c.resistances=pc.resistances.stream().peek(wr -> {
 					wr.value = sanitizeCross(wr.value);
 					wr.type = typesMap.get(wr.type);
 				}).collect(Collectors.toList());
-				if(pc.weaknesses!=null) c.weaknesses=pc.weaknesses.stream().peek(wr -> {
+				if(pc.weaknesses!=null&&!pc.weaknesses.isEmpty()) c.weaknesses=pc.weaknesses.stream().peek(wr -> {
 					wr.value = sanitizeCross(wr.value);
 					wr.type = typesMap.get(wr.type);
 				}).collect(Collectors.toList());
-				if(pc.attacks!=null) c.moves=pc.attacks.stream().peek(a -> {
+				if(pc.attacks!=null&&!pc.attacks.isEmpty()) c.moves=pc.attacks.stream().peek(a -> {
 					a.cost=sanitizeType(a.cost);
 					a.damage=sanitizeCross(a.damage);
 					a.text=replaceTypesWithShortForms(a.text);
@@ -201,7 +173,7 @@ public class PioReader {
 				}
 				c.types=sanitizeType(pc.types);
 				c.nationalPokedexNumber=pc.nationalPokedexNumber;
-				c.evolvesFrom=pc.evolvesFrom;
+				c.evolvesFrom= StringUtils.trimToNull(pc.evolvesFrom);
 				c.evolvesTo=pc.evolvesTo;
 				break;
 			case "Trainer":
@@ -284,9 +256,9 @@ public class PioReader {
 				break;
 			case "Pokémon Tool":
 				c.subTypes.add("POKEMON_TOOL");
-				if(modernSeries.contains(pc.series)){
+//				if(modernSeries.contains(pc.series)){
 					c.subTypes.add("ITEM");
-				}
+//				}
 				break;
 			case "Rocket's Secret Machine":
 				c.subTypes.add("ROCKETS_SECRET_MACHINE");
@@ -315,6 +287,17 @@ public class PioReader {
 	private String replaceTypesWithShortForms(String s){
 		if(s==null)return null;
 		return s
+				.replace("{F}","[F]")
+				.replace("{L}","[L]")
+				.replace("{R}","[R]")
+				.replace("{G}","[G]")
+				.replace("{W}","[W]")
+				.replace("{P}","[P]")
+				.replace("{C}","[C]")
+				.replace("{D}","[D]")
+				.replace("{M}","[M]")
+				.replace("{Y}","[Y]")
+				.replace("{N}","[N]")
 				.replace("Fighting Energy", "[F] Energy")
 				.replace("Lightning Energy", "[L] Energy")
 				.replace("Fire Energy", "[R] Energy")

@@ -32,6 +32,8 @@ import java.util.List;
 @SpringBootApplication(scanBasePackages = "net.tcgone.carddb")
 public class Application implements ApplicationRunner {
 
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Application.class);
+
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 	}
@@ -57,20 +59,23 @@ public class Application implements ApplicationRunner {
 		}
 		List<Card> allCards=new ArrayList<>();
 		if(pios!=null){
-			for (String pio : pios) {
-				allCards.addAll(pioReader.loadPio(new FileInputStream(pio), PioReader.ReaderMode.PIO));
+			for (String filename : pios) {
+				log.info("Reading {}", filename);
+				allCards.addAll(pioReader.loadPio(new FileInputStream(filename), PioReader.ReaderMode.PIO));
 			}
 		}
 		if(kirbies!=null){
-			for (String kirby : kirbies) {
-				allCards.addAll(pioReader.loadPio(new FileInputStream(kirby), PioReader.ReaderMode.KIRBY));
+			for (String filename : kirbies) {
+				log.info("Reading {}", filename);
+				allCards.addAll(pioReader.loadPio(new FileInputStream(filename), PioReader.ReaderMode.KIRBY));
 			}
 		}
 		if(exportYaml){
 			setWriter.writeAll(allCards);
+			log.info("YAMLs have been written to ./output folder");
 		}
 		if(exportImplTmpl){
-			System.err.println("export-impl-tmpl not implemented yet");
+			log.warn("export-impl-tmpl not implemented yet");
 		}
 	}
 
