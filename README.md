@@ -12,8 +12,7 @@ This project has some toolset to add/update cards to TCG ONE card database and c
 
 ## Instructions
 
-1. Clone repo <https://github.com/axpendix/carddb>, then run `./mvnw install` in that repo. You only need to do this once, until we move to a public maven repository.
-1. Clone THIS repo and run: `./mvnw package`
+1. Clone this repo and run: `./mvnw package`. Note that the [`carddb`](https://github.com/axpendix/carddb) dependency is now handled via jitpack.io.
 1. View options: `java -jar target/carddb-tools-*.jar`
 1. Read from [kirby's repo](https://github.com/kirbyUK/ptcgo-data/tree/master/en_US), convert to yaml and implementation templates: `java -jar target/carddb-tools-*.jar "--pio=../ptcgo-data/en_US/sm10.json" "--pio=../ptcgo-data/en_US/det1.json" --export-yaml --export-impl-tmpl`
 1. Download scans: `java -jar target/carddb-tools-*.jar "--pio=../ptcgo-data/en_US/sm10.json" "--pio=../ptcgo-data/en_US/det1.json" --download-scans`
