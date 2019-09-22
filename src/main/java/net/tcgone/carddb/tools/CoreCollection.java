@@ -150,6 +150,8 @@ public enum CoreCollection {
 	TEAM_UP(421, "TMU", "sm9"),
 	DETECTIVE_PIKACHU(422, "DET", "det1"),
 	UNBROKEN_BONDS(423, "UNB", "sm10"),
+	UNIFIED_MINDS(424, "UNM", "sm11"),
+	HIDDEN_FATES(425, "HIF", "hif"),
 
 	//POKEMOD
 	POKEMOD_BASE_SET(911, "PMDBS", null),
