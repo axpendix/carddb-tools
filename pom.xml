@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>com.github.axpendix</groupId>
 			<artifactId>carddb</artifactId>
-			<version>master-SNAPSHOT</version>
+			<version>1.0</version>
 		</dependency>
 
 		<!-- <dependency>
