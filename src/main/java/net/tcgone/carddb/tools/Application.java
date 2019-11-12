@@ -25,10 +25,12 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 /**
  * @author axpendix@hotmail.com
@@ -78,16 +80,30 @@ public class Application implements ApplicationRunner {
 		}
 		if(yamls!=null){
 			for (String filename : yamls) {
-				log.info("Reading {}", filename);
-				SetFile setFile = mapper.readValue(new FileInputStream(filename), SetFile.class);
-				for (Card card : setFile.cards) {
-					card.set = setFile.set; // temporary
+				Stack<File> fileStack = new Stack<>();
+				File file = new File(filename);
+				if(file.isDirectory()){
+					for (File file1 : file.listFiles()) {
+						fileStack.push(file1);
+					}
+				} else {
+					fileStack.push(file);
 				}
-				allCards.addAll(setFile.cards);
+				while (!fileStack.isEmpty()){
+					File pop = fileStack.pop();
+					if(!pop.getName().endsWith("yaml")) continue;
+					log.info("Reading {}", pop.getName());
+					SetFile setFile = mapper.readValue(new FileInputStream(pop), SetFile.class);
+					for (Card card : setFile.cards) {
+						card.set = setFile.set; // temporary
+					}
+					allCards.addAll(setFile.cards);
+				}
 			}
 		}
 		Map<String, SetFile> setFileMap = setWriter.prepareSetFiles(allCards);
 		setWriter.prepareReprints(setFileMap.values());
+//		setWriter.fixGymSeriesEvolvesFromIssue(setFileMap.values());
 		if(downloadScans){
 			scanDownloader.downloadAll(allCards);
 			log.info("Scans have been saved into ./scans folder");

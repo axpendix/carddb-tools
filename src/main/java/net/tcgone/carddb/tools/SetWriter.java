@@ -58,6 +58,7 @@ public class SetWriter {
                     return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
                 }
             }
+
             protected MappingNode representJavaBean(java.util.Set<Property> properties, Object javaBean) {
                 List<NodeTuple> value = new ArrayList<NodeTuple>(properties.size());
                 Tag tag;
@@ -70,9 +71,9 @@ public class SetWriter {
                 for (Property property : properties) {
                     Object memberValue = property.get(javaBean);
                     Tag customPropertyTag = memberValue == null ? null
-                            : classTags.get(memberValue.getClass());
+                        : classTags.get(memberValue.getClass());
                     NodeTuple tuple = representJavaBeanProperty(javaBean, property, memberValue,
-                            customPropertyTag);
+                        customPropertyTag);
                     if (tuple == null) {
                         continue;
                     }
@@ -83,7 +84,7 @@ public class SetWriter {
                     if (!(nodeValue instanceof ScalarNode && ((ScalarNode) nodeValue).isPlain())) {
                         bestStyle = DumperOptions.FlowStyle.BLOCK;
                     }
-                    if("abilities".equals(((ScalarNode) tuple.getKeyNode()).getValue())){
+                    if ("abilities".equals(((ScalarNode) tuple.getKeyNode()).getValue())) {
                         bestStyle = DumperOptions.FlowStyle.BLOCK;
                     }
                     value.add(tuple);
@@ -133,25 +134,25 @@ public class SetWriter {
     private void write(SetFile setFile, String filename) throws IOException {
         //        objectMapper.writeValue(new File(filename),setFile);
         for (Card card : setFile.cards) {
-            card.set=null;
-            card.merged=null;
-            if(card.moves!=null){
+            card.set = null;
+            card.merged = null;
+            if (card.moves != null) {
                 for (Move move : card.moves) {
-                    if(move.damage!=null && move.damage.isEmpty()) {
+                    if (move.damage != null && move.damage.isEmpty()) {
                         move.damage = null;
                     }
-                    if(move.text!=null && move.text.isEmpty()){
+                    if (move.text != null && move.text.isEmpty()) {
                         move.text = null;
                     }
-                    if(move.cost!=null && move.cost.size()==1 && move.cost.get(0)==null){
-                        move.cost=new ArrayList<>();
+                    if (move.cost != null && move.cost.size() == 1 && move.cost.get(0) == null) {
+                        move.cost = new ArrayList<>();
                     }
                 }
             }
         }
         String dump = yaml.dumpAs(setFile, Tag.MAP, null);
         BufferedWriter out = new BufferedWriter
-                (new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8));
+            (new OutputStreamWriter(new FileOutputStream(filename), StandardCharsets.UTF_8));
         out.write(dump);
         out.close();
     }
@@ -165,13 +166,13 @@ public class SetWriter {
     }
 
     public Map<String, SetFile> prepareSetFiles(List<Card> cards) {
-        Map<String, SetFile> setFileMap=new HashMap<>();
+        Map<String, SetFile> setFileMap = new HashMap<>();
         for (Card card : cards) {
             String key = card.set.enumId;
-            if(!setFileMap.containsKey(key)){
+            if (!setFileMap.containsKey(key)) {
                 SetFile setFile = new SetFile();
-                setFile.set=card.set;
-                setFile.cards=new ArrayList<>();
+                setFile.set = card.set;
+                setFile.cards = new ArrayList<>();
                 setFileMap.put(key, setFile);
             }
             setFileMap.get(key).cards.add(card);
@@ -189,26 +190,51 @@ public class SetWriter {
         }
         return setFileMap;
     }
-    public void prepareReprints(Collection<SetFile> setFiles){
-        Map<EqualityCard,Card> map=new HashMap<>();
+
+    public void prepareReprints(Collection<SetFile> setFiles) {
+        Map<EqualityCard, Card> map = new HashMap<>();
         for (SetFile setFile : setFiles) {
             for (Card c : setFile.cards) {
 //                int hash = Objects.hash(c.name, c.types, c.superType, c.subTypes, c.evolvesFrom, c.hp, c.retreatCost, c.abilities, c.moves, c.weaknesses, c.resistances, c.text, c.energy);
                 EqualityCard ec = new EqualityCard(c);
-                if(map.containsKey(ec)){
+                if (map.containsKey(ec)) {
                     Card oc = map.get(ec);
-                    if(c.rarity.equalsIgnoreCase("Ultra Rare")) {
+                    if (c.rarity.equalsIgnoreCase("Ultra Rare")) {
                         // most likely full art
-                        c.copyType="Full Art";
-                    } else if(c.rarity.equalsIgnoreCase("Secret")) {
+                        c.copyType = "Full Art";
+                    } else if (c.rarity.equalsIgnoreCase("Secret")) {
                         // most likely secret art
-                        c.copyType="Secret Art";
+                        c.copyType = "Secret Art";
                     } else {
-                        c.copyType="Reprint";
+                        c.copyType = "Reprint";
                     }
-                    c.copyOf=oc.id;
+                    c.copyOf = oc.id;
                 } else {
-                    map.put(ec,c);
+                    map.put(ec, c);
+                }
+            }
+        }
+    }
+
+    public void fixGymSeriesEvolvesFromIssue(Collection<SetFile> setFiles) {
+        List<String> owners = Arrays.asList("Blaine's", "Brock's", "Misty's", "Lt. Surge's", "Sabrina's", "Erika's", "Koga's", "Giovanni's");
+        for (SetFile setFile : setFiles) {
+            if(setFile.set.name.contains("Gym ")){
+                for (Card card : setFile.cards) {
+                    if(card.subTypes.contains("EVOLUTION")){
+                        for (String owner : owners) {
+                            if(card.name.startsWith(owner)){
+                                if(card.evolvesFrom == null){
+                                    System.out.println("NoEvolvesFrom:"+card.name);
+                                }
+                                if(!card.evolvesFrom.startsWith(owner)){
+                                    System.out.println(card.name);
+                                    card.evolvesFrom = owner + " " + card.evolvesFrom;
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
