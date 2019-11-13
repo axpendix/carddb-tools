@@ -136,7 +136,7 @@ public enum CoreCollection {
 	EVOLUTIONS(374, "EVO", null),
 
 	//Sun & Moon
-	SUN_MOON_PROMOS(410, "Sun & Moon Promos", "SMP", null),
+	SUN_MOON_PROMOS(410, "Sun & Moon Promos", "SMP", "smp"),
 	SUN_MOON(411, "Sun & Moon", "SM", null),
 	GUARDIANS_RISING(412, "GRI", null),
 	BURNING_SHADOWS(413, "BUS", null),
@@ -152,6 +152,8 @@ public enum CoreCollection {
 	UNBROKEN_BONDS(423, "UNB", "sm10"),
 	UNIFIED_MINDS(424, "UNM", "sm11"),
 	HIDDEN_FATES(425, "HIF", "hif"),
+	SHINY_VAULT(426, "SMA", "sma"),
+	COSMIC_ECLIPSE(427, "CEC", "sm12"),
 
 	//POKEMOD
 	POKEMOD_BASE_SET(911, "PMDBS", null),

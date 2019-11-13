@@ -67,6 +67,7 @@ public class PioReader {
 					.replace("rare break","Ultra Rare")
 					.replace("rare holo ex","Ultra Rare")
 					.replace("rare holo gx","Ultra Rare")
+					.replace("rare promo","Promo")
 					.replace("legend","Ultra Rare");
 			pc.rarity= WordUtils.capitalizeFully(pc.rarity);
 			if(!allowedRarities.contains(pc.rarity)){
