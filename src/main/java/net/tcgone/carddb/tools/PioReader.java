@@ -68,7 +68,10 @@ public class PioReader {
 					.replace("rare holo ex","Ultra Rare")
 					.replace("rare holo gx","Ultra Rare")
 					.replace("rare promo","Promo")
-					.replace("legend","Ultra Rare");
+					.replace("legend","Ultra Rare")
+					.replace("rareholovmax", "Rare Holo")
+					.replace("rareholov","Rare Holo");
+
 			pc.rarity= WordUtils.capitalizeFully(pc.rarity);
 			if(!allowedRarities.contains(pc.rarity)){
 				throw new IllegalStateException(pc.rarity+" cannot be accepted as rarity, please fix.");
@@ -103,7 +106,7 @@ public class PioReader {
 	}
 
 	private Set<String> stage1Db = new HashSet<>();
-	private Set<String> modernSeries = ImmutableSet.of("Black & White", "XY", "Sun & Moon");
+	private Set<String> modernSeries = ImmutableSet.of("Black & White", "XY", "Sun & Moon", "Sword & Shield");
 	private Set<String> allowedRarities = ImmutableSet.of("Common","Uncommon","Rare","Ultra Rare","Rare Holo","Secret","Promo");
 	private Map<String,String> typesMap = ImmutableMap.<String,String>builder().put("Fire","R").put("Grass","G").put("Water","W").put("Fighting","F").put("Colorless","C").put("Lightning","L").put("Psychic","P").put("Darkness","D").put("Metal","M").put("Dragon","N").put("Fairy","Y").build();
 	private Map<String, net.tcgone.carddb.model.Set> setMap = new HashMap<>();
@@ -201,6 +204,9 @@ public class PioReader {
 				if(pc.name.contains("-EX")){
 					c.subTypes.add("POKEMON_EX");
 				}
+				if (pc.name.endsWith("V")) {
+					c.subTypes.add("POKEMON_V");
+				}
 				break;
 			case "Stage 1":
 				c.subTypes.add("EVOLUTION");
@@ -245,6 +251,10 @@ public class PioReader {
 				} else {
 					c.subTypes.add("BASIC");
 				}
+				break;
+			case "VMAX":
+				c.subTypes.add("VMAX");
+				c.subTypes.add("EVOLUTION");
 				break;
 			case "MEGA":
 				c.subTypes.add("EVOLUTION");

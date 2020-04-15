@@ -156,6 +156,11 @@ public class ImplTmplGenerator {
 						}
 						if(m.text!=null)
 							movedesc+=m.text;
+
+						String trailingString = "\n\t\t\t\t";
+						if (card.moves.indexOf(m) == (card.moves.size() -1)) {
+							trailingString = "";
+						}  	
 						moves.append(String.format("move \"%s\", {\n" +
 								"\t\t\t\t\ttext \"%s\"\n" +
 								"\t\t\t\t\tenergyCost %s\n" +
@@ -163,8 +168,8 @@ public class ImplTmplGenerator {
 								"\t\t\t\t\tonAttack {\n" +
 								"\t\t\t\t\t\t%s\n" +
 								"\t\t\t\t\t}\n" +
-								"\t\t\t\t}\n\t\t\t\t", m.name, movedesc, StringUtils.join(m.cost,", "),movedamg!=null?"damage "+movedamg:""));
-
+								"\t\t\t\t}%s", m.name, movedesc, StringUtils.join(m.cost,", "),movedamg!=null?"damage "+movedamg:"", trailingString));
+						
 					}
 				}
 			}
@@ -182,7 +187,7 @@ public class ImplTmplGenerator {
 						"\t\t\t}", 
 						hp, typesCombined, rc, weakness.toString(), resistance.toString(), abilities.toString(), moves.toString());
 			}
-			else if (cardTypeSet.contains("EVOLUTION")) {
+			else if (cardTypeSet.contains("EVOLUTION") || cardTypeSet.contains("VMAX")) {
 				impl =  String.format("evolution (this, from:\"%s\", hp:%s, type:%s, retreatCost:%s) {\n" +
 						"\t\t\t\t%s%s%s%s\n" +
 						"\t\t\t}", 

@@ -155,6 +155,10 @@ public enum CoreCollection {
 	SHINY_VAULT(426, "SMA", "sma"),
 	COSMIC_ECLIPSE(427, "CEC", "sm12"),
 
+	// Sword & Shield
+	SWORD_SHIELD(430, "SSH", "swsh1"),
+	REBEL_CLASH(431, "RCL", "swsh2"),
+
 	//POKEMOD
 	POKEMOD_BASE_SET(911, "PMDBS", null),
 	POKEMOD_JUNGLE(912, "PMDJU", null),
