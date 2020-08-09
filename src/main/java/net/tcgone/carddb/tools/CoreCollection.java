@@ -48,9 +48,9 @@ public enum CoreCollection {
 	NEO_DESTINY(164, "N4", null),
 
 	//E-CARD
-	EXPEDITION(171, "EXP", null),
-	AQUAPOLIS(172, "AQP", null),
-	SKYRIDGE(173, "SKR", null),
+	EXPEDITION(171, "EXP", "ecard1"),
+	AQUAPOLIS(172, "AQP", "ecard2"),
+	SKYRIDGE(173, "SKR", "ecard3"),
 
 	//EX
 	RUBY_SAPPHIRE(211, "Ruby & Sapphire", "RS", null),
