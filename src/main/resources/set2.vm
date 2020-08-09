@@ -36,7 +36,7 @@ import tcgwars.logic.util.*;
 public enum ${classname} implements LogicCardInfo {
     
 #foreach( $obj1 in $list1 )
-  ${obj1.name} ("${obj1.fullname}", ${obj1.cln}, Rarity.${obj1.rarity}, ${obj1.cardtype}),
+  ${obj1.name} ("${obj1.fullname}", "${obj1.cardNumber}", Rarity.${obj1.rarity}, ${obj1.cardtype}),
 #end;
     
   static Type C = COLORLESS, R = FIRE, F = FIGHTING, G = GRASS, W = WATER, P = PSYCHIC, L = LIGHTNING, M = METAL, D = DARKNESS, Y = FAIRY, N = DRAGON;
@@ -44,9 +44,9 @@ public enum ${classname} implements LogicCardInfo {
   protected CardTypeSet cardTypes;
   protected String name;
   protected Rarity rarity;
-  protected int collectionLineNo;
+  protected String collectionLineNo;
 
-  ${classname}(String name, int collectionLineNo, Rarity rarity, List<CardType> cardTypes) {
+  ${classname}(String name, String collectionLineNo, Rarity rarity, List<CardType> cardTypes) {
     this.cardTypes = new CardTypeSet(cardTypes as CardType[]);
     this.name = name;
     this.rarity = rarity;
@@ -69,7 +69,7 @@ public enum ${classname} implements LogicCardInfo {
   }
 
   @Override
-  public int getCollectionLineNo() {
+  public String getNumber() {
     return collectionLineNo;
   }
 

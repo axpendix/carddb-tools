@@ -273,7 +273,7 @@ public class ImplTmplGenerator {
 
 			List1Item item1 = new List1Item();
 			item1.cardtype=cardTypeSet;
-			item1.cln = card.number;
+			item1.cardNumber = card.number;
 			item1.fullname = card.name;
 			item1.name = card.enumId;
 			item1.rarity = rarity;
@@ -305,7 +305,7 @@ public class ImplTmplGenerator {
 		private String fullname;
 		private List<String> cardtype;
 		private String rarity;
-		private String cln;
+		private String cardNumber;
 		public String getName() {
 			return name;
 		}
@@ -330,11 +330,11 @@ public class ImplTmplGenerator {
 		public void setRarity(String rarity) {
 			this.rarity = rarity;
 		}
-		public String getCln() {
-			return cln;
+		public String getCardNumber() {
+			return cardNumber;
 		}
-		public void setCln(String cln) {
-			this.cln = cln;
+		public void setCardNumber(String cardNumber) {
+			this.cardNumber = cardNumber;
 		}
 		
 	}
