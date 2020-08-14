@@ -46,9 +46,9 @@ sub process_file {
 	# say $l_out;
 	# say $m_out;
 	print "\r$file Resizing 1\e[K";
-	system("magick",$next,"-resize","440",$l_out);
+	system("magick",$next,"-resize","450",$l_out);
 	print "\r$file Resizing 2\e[K";
-	system("magick",$next,"-resize","220",$m_out);
+	system("magick",$next,"-resize","225",$m_out);
 	print "\r.\e[K";
 }
 
