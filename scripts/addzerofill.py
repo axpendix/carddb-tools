@@ -1,4 +1,10 @@
 #!/usr/bin/python3
+
+# adds zerofill to scan files, ie 1.jpg -> 001.jpg.
+# very rudimentary. may ruin your files, use at your own risk.
+# use it inside the directory. 
+# author: axpendix@hotmail.com
+
 import os, re
 rep = re.compile('\\D')
 

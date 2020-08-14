@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 import os
 
+# drops zerofill from scan files, ie 001.jpg -> 1.jpg.
+# very rudimentary. may ruin your files, use at your own risk.
+# use it inside the directory.
+# author: axpendix@hotmail.com
+
 def walk_file(f):
   if '.png' in f or '.jpg' in f:
     fp=f.split('/')[-1].split('.')[0]
