@@ -1,3 +1,5 @@
+## Update 2021-02-20: This is a stale module. Please use [`carddb/tools`](https://github.com/tcgone/carddb/tree/master/tools) instead. 
+
 # carddb-tools
 
 This project has some toolset to add/update cards to TCG ONE card database and card implementations.
